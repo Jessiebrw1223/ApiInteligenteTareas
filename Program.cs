@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Render usa el puerto desde la variable PORT
+// Puerto para Render
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
@@ -12,9 +12,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// Cadena de conexión compatible con Render
+var connectionString = Environment.GetEnvironmentVariable("RENDER") == "true"
+    ? "Data Source=/tmp/tareas.db"
+    : builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Solución para Render con SQLite
+// Si se ejecuta local y usa carpeta Data, crearla si no existe
 if (!string.IsNullOrWhiteSpace(connectionString) &&
     connectionString.Contains("Data Source=Data/", StringComparison.OrdinalIgnoreCase))
 {
